@@ -11,13 +11,24 @@ object Movies {
 
         val inputFile = "input/movies.csv"
 
-        // Διάβασμα του αρχείου csv
+        // Διάβασμα του αρχείου csv και επεξεργασία των απαραίτητων στηλών
         val df = ss.read.option("header", "true").csv(inputFile)
-            // Αφαίρεση σημείων στίξης από τη στήλη text. Μετατροπή όλων των χαρακτήρων σε πεζά.
-            .withColumn("title", regexp_replace(col("title"), "[^A-Za-z0-9]+", " "))
-            .withColumn("title", lower(col("title")))
+            // Get year column from title in format (YYYY)
+            .withColumn("year", regexp_replace(col("title"), ".*\\((\\d{4})\\).*", "$1"))
+            // Get title column without year
+            .withColumn("title", regexp_replace(col("title"), "\\s*\\(\\d{4}\\)", ""))
+            // Split genres column by | and explode
+            .withColumn("genres", explode(split(col("genres"), "\\|")))
 
-        df.show()
-        df.printSchema()
+        // Εμφάνιση των κατηγοριών και μέτρηση των ταινιών που ανήκουν σε κάθε μία
+        df.groupBy("genres")
+            .count()
+            .orderBy(col("count").desc)
+            .show()
+
+
+
+//        df.show()
+//        df.printSchema()
     }
 }
