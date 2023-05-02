@@ -23,7 +23,7 @@ object Movies {
         // Εμφάνιση των κατηγοριών και μέτρηση των ταινιών που ανήκουν σε κάθε μία
         df.groupBy("genres")
             .count()
-            .orderBy(col("count").desc)
+            .orderBy(col("genres").asc)
             .show()
 
 
