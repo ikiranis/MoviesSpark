@@ -19,22 +19,36 @@ object Movies {
             // Get title column without year
             .withColumn("title", regexp_replace(col("title"), "\\s*\\(\\d{4}\\)", ""))
 
-
         // Εμφάνιση των κατηγοριών και μέτρηση των ταινιών που ανήκουν σε κάθε μία
-        df.withColumn("genres", explode(split(col("genres"), "\\|")))
-            .groupBy("genres")
+        println("Number of movies per genre")
+
+        df.withColumn("genre", explode(split(col("genres"), "\\|")))
+            .groupBy("genre")
             .count()
-            .orderBy(col("genres").asc)
+            .orderBy(col("genre").asc)
             .show()
 
         // Μέτρηση των ταινιών που έχουν βγει ανά έτος. Εμφάνιση των 10 πρώτων
+        println("Number of movies per year. Best 10 years")
+
         df.groupBy("year")
             .count()
             .orderBy(col("count").desc)
             .show(10)
 
+        // Μέτρηση των λέξεων που υπάρχουν στους τίτλους των ταινιών
+        // Εμφάνιση των 10 πρώτων
+        // Αφαίρεση των λέξεων με μήκος μικρότερο των 4 χαρακτήρων
+        println("Most common words in movie titles. Best 10 words")
 
-        df.show()
+        df.withColumn("word", explode(split(lower(col("title")), " ")))
+            .groupBy("word")
+            .count()
+            .filter(col("word").rlike("\\w{4,}"))
+            .orderBy(col("count").desc)
+            .show(10)
+
+//        df.show()
 //        df.printSchema()
     }
 }
